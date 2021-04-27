@@ -13,13 +13,16 @@ import time
 import threading
 from os import path
 from datetime import date
+from datetime import timedelta
 from time import time
 from time import sleep
 from utils import Utils
+from zoom_files_delete import Zoom
+from report_mailer import Mailer
 
 #constants
 START_WAIT = 7
-VIDEO_DESCRIPTION = 'Video de sesión de: {topic}, al {start_date}'
+VIDEO_DESCRIPTION = 'Practee Zoom Session: {topic} on {start_date}'
 
 def fibo(n):
 	if n <= 1:
@@ -126,9 +129,9 @@ def update_outputfile(records, filename):
 	return records
 
 
-def find_videoID(records, meeting):
+def find_video_ID(records, meeting):
 	for record in records:
-		if record['meeting_id'] == meeting and record['file_extension'] == 'MP4':
+		if record['meeting_uuid'] == meeting and record['file_extension'] == 'MP4':
 			return record['vimeo_id'], record['file_name'],record['vimeo_status']
 	return 0, 0, 0
 
@@ -158,7 +161,7 @@ def upload_zoom_transcript(records):
 				transcript = get_transcript(download_url, record['file_name'])
 				if (transcript):
 					print('\n'+' Getting the text track URI of {filename} '.format(filename=record['file_name']).center(100, ':'))
-					video_id, video_name, status = find_videoID(records, record['meeting_id'])
+					video_id, video_name, status = find_video_ID(records, record['meeting_uuid'])
 					if (video_id):
 						_url = url+"/videos/"+video_id
 						response = requests.request("GET", _url, headers=headers)
@@ -309,8 +312,13 @@ def upload_zoom_videos(records):
 	return records
 
 if __name__ == "__main__":
+	date = date.today() - timedelta(days=1)
+	arg = ['vimeo_uploader.py', '--daterange', str(date), str(date), '--outputfile', 'outputfile.csv']
+	# print(arg)
+
 	utils = Utils()
-	files = utils.get_records(sys.argv, 'vimeo_uploader.py')
+	# files = utils.get_records(sys.argv, 'vimeo_uploader.py')
+	files = utils.get_records(arg, 'vimeo_uploader.py')
 
 	if utils.input_type == 1:
 		files = check_upload_videos(files, utils.input_file)
@@ -322,4 +330,10 @@ if __name__ == "__main__":
 	files = update_outputfile(files, utils.output_file)
 	move_videos_to_folder(files)
 
+	mail = Mailer().send_mail("asutosh2000ad@gmail.com")
+
+	files = Zoom.delete_zoom_files(files)
+	utils.save_csv(files, utils.output_file)
+
+	mail = Mailer.send_mail("asutosh2000ad@gmail.com")
 	print(' Script finished! '.center(100,':'))
