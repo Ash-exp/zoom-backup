@@ -1,0 +1,6 @@
+.DS_Store
+meetings/
+config.json
+*.csv
+__pycache__/
+scripts.py
