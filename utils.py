@@ -102,6 +102,8 @@ class Utils:
 
 				if json_response['total_records'] > 0:
 					for meeting in json_response['meetings']:
+						if meeting['duration'] < 2:
+							continue
 						if meeting['recording_count'] > 0:
 							for recording in meeting['recording_files']:
 								try:
@@ -111,7 +113,10 @@ class Utils:
 									item['recording_start'] = recording['recording_start']
 									item['recording_end'] = recording['recording_end']
 									item['download_url'] = recording['download_url'] #urllib.parse.quote(recording['download_url'])
-									item['play_url'] = recording['play_url']
+									try:
+										item['play_url'] = recording['play_url']
+									except KeyError:
+										item['play_url'] = ""
 									item['topic'] = meeting['topic']
 									item['record_id'] = recording['id']
 									item['meeting_id'] = meeting['id']

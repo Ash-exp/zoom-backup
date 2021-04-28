@@ -155,7 +155,7 @@ def upload_zoom_transcript(records):
 	}
 
 	for record in records:
-		if record['file_extension'] == 'VTT':
+		if record['file_extension'] == 'VTT' and not "?type=cc" in record['download_url']:
 			if record['vimeo_status'] != 'active':
 				download_url = record['download_url'] + '?access_token=' + utils.zoom_token
 				transcript = get_transcript(download_url, record['file_name'])
@@ -312,7 +312,7 @@ def upload_zoom_videos(records):
 	return records
 
 if __name__ == "__main__":
-	date = date.today() - timedelta(days=1)
+	date = date.today()
 	arg = ['vimeo_uploader.py', '--daterange', str(date), str(date), '--outputfile', 'outputfile.csv']
 	# print(arg)
 
@@ -330,10 +330,12 @@ if __name__ == "__main__":
 	files = update_outputfile(files, utils.output_file)
 	move_videos_to_folder(files)
 
-	mail = Mailer().send_mail("asutosh2000ad@gmail.com")
-
 	files = Zoom.delete_zoom_files(files)
 	utils.save_csv(files, utils.output_file)
 
-	mail = Mailer.send_mail("asutosh2000ad@gmail.com")
+	try:
+		Mailer().send_mail("asutosh2000ad@gmail.com")
+	except:
+		print(' MAIL FAILED '.center(100,':'))
+
 	print(' Script finished! '.center(100,':'))

@@ -11,7 +11,7 @@ class Mailer:
         email_user = 'ash2000test@gmail.com'
         email_password = 'Test@123user'
         email_send = reciever
-        subject = date.today()+'ZOOM RECORDINGS UPLOAD REPORT'
+        subject = str(date.today())+'ZOOM RECORDINGS UPLOAD REPORT'
 
         msg = MIMEMultipart()
         msg['From'] = email_user
