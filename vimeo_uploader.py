@@ -4,19 +4,17 @@
 import os
 import sys
 import requests
-import calendar
 import csv
 import json
-import wget
 import os.path
 import time
-import threading
 from os import path
 from datetime import date
 from datetime import timedelta
 from time import time
 from time import sleep
 from utils import Utils
+from transcript_uploader import Transcript
 from zoom_files_delete import Zoom
 from report_mailer import Mailer
 
@@ -113,98 +111,6 @@ def move_videos_to_folder(records):
 				request_move_videos_to_folder(videos_list, record, folders[record])
 		else:
 			request_move_videos_to_folder(videos_list, record, folders[record])
-
-
-
-def update_outputfile(records, filename):
-	print('\n'+' Checking video status from Vimeo '.center(100, ':'))
-
-	with open(filename, mode='w') as f:
-		writer = csv.writer(f)
-		writer.writerow(utils.CSV_HEADER)
-
-		for record in records:
-			writer.writerow(utils.get_record_row(record))
-
-	return records
-
-
-def find_video_ID(records, meeting):
-	for record in records:
-		if record['meeting_uuid'] == meeting and record['file_extension'] == 'MP4':
-			return record['vimeo_id'], record['file_name'],record['vimeo_status']
-	return 0, 0, 0
-
-
-def get_transcript(url, filename):
-	response = requests.request("GET", url)
-	if response.status_code == 200:
-		return response.content
-	else:
-		print('\n'+' Failed to Download {filename}. Response Status Code : {status}'.format(filename=filename, status=response.status_code).center(100, ':'))
-		return 0
-
-
-def upload_zoom_transcript(records):
-	print('\n'+' Backup transcript files from Zoom '.center(100, ':'))
-	url = "https://api.vimeo.com"
-	headers = {
-		'Authorization': 'Bearer '+utils.vimeo_token,
-		'Content-Type': 'application/json',
-		'Accept': '*/*'
-	}
-
-	for record in records:
-		if record['file_extension'] == 'VTT' and not "?type=cc" in record['download_url']:
-			if record['vimeo_status'] != 'active':
-				download_url = record['download_url'] + '?access_token=' + utils.zoom_token
-				transcript = get_transcript(download_url, record['file_name'])
-				if (transcript):
-					print('\n'+' Getting the text track URI of {filename} '.format(filename=record['file_name']).center(100, ':'))
-					video_id, video_name, status = find_video_ID(records, record['meeting_uuid'])
-					if (video_id):
-						_url = url+"/videos/"+video_id
-						response = requests.request("GET", _url, headers=headers)
-						json_response = json.loads(response.text)
-						texttracks_uri = json_response["metadata"]["connections"]["texttracks"]["uri"]
-
-						print('\n'+' Uploading {filename} '.format(filename=record['file_name']).center(100, ':'))
-						body = {}
-
-						body['type'] = "subtitles"
-						body['language'] = "en"
-						body['name'] = record['file_name']
-
-						_url = url+texttracks_uri
-						response = requests.request("POST", _url, headers=headers, data=json.dumps(body))
-						json_response = json.loads(response.text)
-
-						if response.status_code == 201:
-
-							upload_link = json_response["link"]
-							patch_link = url+json_response["uri"]
-							response = requests.request(
-								"PUT", upload_link, headers=headers, data=transcript)
-
-							if response.status_code == 200:
-								response = requests.request(
-									"PATCH", patch_link, headers=headers, data=json.dumps({"active": True}))
-								if response.status_code == 200:
-									record['vimeo_status'] = "active"
-									print('\n'+' Successfully Uploaded {filename}'.format(filename=record['file_name']))
-								else:
-									record['vimeo_status'] = "not active"
-									print('\n'+' Failed to Activate {filename}. Response Status Code : {status}'.format(filename=record['file_name'], status=response.status_code).center(100, ':'))
-
-							else: print('\n'+' Failed to Upload {filename}. Response Status Code : {status}'.format(filename=record['file_name'], status=response.status_code).center(100, ':'))
-
-						else: print('\n'+' Failed Post request to texttracks_uri {filename}. Response Status Code : {status}'.format(filename=record['file_name'], status=response.status_code).center(100, ':'))
-
-					else: print('\n'+'Record {filename} needs to be uploaded first! '.format(filename=video_name))
-
-			else: print('\n'+'Transcript {filename} is already uploaded! '.format(filename=record['file_name']))
-
-	return records
 
 
 def set_embeded_presets(record):
@@ -314,7 +220,6 @@ def upload_zoom_videos(records):
 if __name__ == "__main__":
 	date = date.today()
 	arg = ['vimeo_uploader.py', '--daterange', str(date), str(date), '--outputfile', 'outputfile.csv']
-	# print(arg)
 
 	utils = Utils()
 	# files = utils.get_records(sys.argv, 'vimeo_uploader.py')
@@ -326,16 +231,18 @@ if __name__ == "__main__":
 	files = upload_zoom_videos(files)
 	files = check_upload_videos(files, utils.output_file)
 
-	files = upload_zoom_transcript(files)
-	files = update_outputfile(files, utils.output_file)
+	files = Transcript().upload_zoom_transcript(files)
+	files = Transcript().update_outputfile(files, utils.output_file)
 	move_videos_to_folder(files)
 
-	files = Zoom.delete_zoom_files(files)
-	utils.save_csv(files, utils.output_file)
+	if (utils.zoom_recordings_delete):
+		files = Zoom().delete_zoom_files(files)
+		utils.save_csv(files, utils.output_file)
 
-	try:
-		Mailer().send_mail("asutosh2000ad@gmail.com")
-	except:
-		print(' MAIL FAILED '.center(100,':'))
+	if (utils.report_mailer["active"]):
+		try:
+			Mailer().send_mail(utils.report_mailer["mail-to"])
+		except:
+			print(' MAIL FAILED '.center(100,':'))
 
 	print(' Script finished! '.center(100,':'))

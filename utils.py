@@ -22,30 +22,33 @@ class Utils:
 		self.vimeo_token = data['vimeo-token']
 		self.vimeo_userid = data['vimeo-user-id']
 		self.vimeo_preset_id = data["vimeo-preset-id"]
+		self.min_duration = data["min-duration"]
+		self.zoom_recordings_delete = data["zoom-recordings-delete"]
+		self.report_mailer = data["report-mailer"]
 
-	def get_start_date(self):
-		return self.start_date
+	# def get_start_date(self):
+	# 	return self.start_date
 
-	def get_end_date(self):
-		return self.end_date
+	# def get_end_date(self):
+	# 	return self.end_date
 
-	def get_zoom_token(self):
-		return self.zoom_token
+	# def get_zoom_token(self):
+	# 	return self.zoom_token
 
-	def get_vimeo_token(self):
-		return self.vimeo_token
+	# def get_vimeo_token(self):
+	# 	return self.vimeo_token
 
-	def get_vimeo_userid(self):
-		return self.vimeo_userid
+	# def get_vimeo_userid(self):
+	# 	return self.vimeo_userid
 
-	def get_vimeo_preset_id(self):
-		return self.vimeo_preset_id
+	# def get_vimeo_preset_id(self):
+	# 	return self.vimeo_preset_id
 
-	def get_CSV_HEADER(self):
-		return self.CSV_HEADER
+	# def get_CSV_HEADER(self):
+	# 	return self.CSV_HEADER
 
-	def get_files(self):
-		return self.files
+	# def get_files(self):
+	# 	return self.files
 
 	def get_zoom_users(self):
 		print(' Fetching user ids '.center(100,':'))
@@ -102,7 +105,7 @@ class Utils:
 
 				if json_response['total_records'] > 0:
 					for meeting in json_response['meetings']:
-						if meeting['duration'] < 2:
+						if meeting['duration'] < self.min_duration:
 							continue
 						if meeting['recording_count'] > 0:
 							for recording in meeting['recording_files']:

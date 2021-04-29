@@ -10,7 +10,7 @@ from utils import Utils
 
 class Zoom :
 
-	def delete_zoom_files(records):
+	def delete_zoom_files(self,records):
 		utils = Utils()
 		query = {"action": "trash"}
 		headers = {'authorization': 'Bearer '+utils.zoom_token}

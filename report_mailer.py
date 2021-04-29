@@ -4,12 +4,14 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.base import MIMEBase
 from email import encoders
 from datetime import date
+from utils import Utils
 
 class Mailer:
 
     def send_mail(self, reciever):
-        email_user = 'ash2000test@gmail.com'
-        email_password = 'Test@123user'
+        utils = Utils()
+        email_user = utils.report_mailer["mail-id"]
+        email_password = utils.report_mailer["mail-password"]
         email_send = reciever
         subject = str(date.today())+'ZOOM RECORDINGS UPLOAD REPORT'
 

@@ -1,0 +1,14 @@
+{
+    "zoom-token": "",
+    "vimeo-token": "",
+    "vimeo-user-id": "",
+    "vimeo-preset-id": "",
+    "min-duration": 2,
+    "zoom-recordings-delete": true,
+    "report-mailer": {
+        "active": true,
+        "mail-to": "reciever@gmail.com",
+        "mail-id": "sender@gmail.com",
+        "mail-password": "sender-mail-id-pass"
+    }
+}
