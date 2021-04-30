@@ -53,7 +53,7 @@ class Transcript:
 					download_url = record['download_url'] + '?access_token=' + self.utils.zoom_token
 					transcript = self.get_transcript(download_url, record['file_name'])
 					if (transcript):
-						print('\n'+' Getting the text track URI of {filename} '.format(filename=record['file_name']).center(100, ':'))
+						# print('\n'+' Getting the text track URI of {filename} '.format(filename=record['file_name']).center(100, ':'))
 						video_id, video_name, status = self.find_video_ID(records, record['meeting_uuid'])
 						if (video_id):
 							_url = url+"/videos/"+video_id
@@ -84,7 +84,7 @@ class Transcript:
 										"PATCH", patch_link, headers=headers, data=json.dumps({"active": True}))
 									if response.status_code == 200:
 										record['vimeo_status'] = "active"
-										print('\n'+' Successfully Uploaded {filename}'.format(filename=record['file_name']))
+										print(' Successfully Uploaded {filename}'.format(filename=record['file_name']))
 									else:
 										record['vimeo_status'] = "not active"
 										print('\n'+' Failed to Activate {filename}. Response Status Code : {status}'.format(filename=record['file_name'], status=response.status_code).center(100, ':'))

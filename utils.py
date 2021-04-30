@@ -22,33 +22,10 @@ class Utils:
 		self.vimeo_token = data['vimeo-token']
 		self.vimeo_userid = data['vimeo-user-id']
 		self.vimeo_preset_id = data["vimeo-preset-id"]
+		self.vimeo_password = data["vimeo-password"]
 		self.min_duration = data["min-duration"]
 		self.zoom_recordings_delete = data["zoom-recordings-delete"]
 		self.report_mailer = data["report-mailer"]
-
-	# def get_start_date(self):
-	# 	return self.start_date
-
-	# def get_end_date(self):
-	# 	return self.end_date
-
-	# def get_zoom_token(self):
-	# 	return self.zoom_token
-
-	# def get_vimeo_token(self):
-	# 	return self.vimeo_token
-
-	# def get_vimeo_userid(self):
-	# 	return self.vimeo_userid
-
-	# def get_vimeo_preset_id(self):
-	# 	return self.vimeo_preset_id
-
-	# def get_CSV_HEADER(self):
-	# 	return self.CSV_HEADER
-
-	# def get_files(self):
-	# 	return self.files
 
 	def get_zoom_users(self):
 		print(' Fetching user ids '.center(100,':'))

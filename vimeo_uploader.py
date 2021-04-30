@@ -193,7 +193,11 @@ def upload_zoom_videos(records):
 				body['description']=VIDEO_DESCRIPTION.format(topic=record['topic'],start_date=record['recording_start'])
 
 				privacy= {}
-				privacy['view']='nobody'
+				if (utils.vimeo_password["active"]):
+					privacy['view']='password'
+					privacy['password']=utils.vimeo_password["password"]
+				else :
+					privacy['view']='nobody'
 				privacy['embed']='public'
 				privacy['comments']='nobody'
 				privacy['download']='false'
@@ -218,7 +222,7 @@ def upload_zoom_videos(records):
 	return records
 
 if __name__ == "__main__":
-	date = date.today()
+	date = date.today()-timedelta(days=1)
 	arg = ['vimeo_uploader.py', '--daterange', str(date), str(date), '--outputfile', 'outputfile.csv']
 
 	utils = Utils()
@@ -245,4 +249,4 @@ if __name__ == "__main__":
 		except:
 			print(' MAIL FAILED '.center(100,':'))
 
-	print(' Script finished! '.center(100,':'))
+	print('\n Script finished! '.center(100,':'))

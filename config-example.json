@@ -3,10 +3,16 @@
     "vimeo-token": "",
     "vimeo-user-id": "",
     "vimeo-preset-id": "",
-    "min-duration": 2,
-    "zoom-recordings-delete": true,
+    "vimeo-password": {
+        "active": true / false, //True if you want to set password view in vimeo
+        "password": "your_password"
+    },
+    "min-duration": 2, //minimum duration of the zoom cloud recordings to be uploaded.
+    //(set this to 0 if you want all the recordings)
+
+    "zoom-recordings-delete": true / false, //True if you want to move succesfully uploaded files to Trash
     "report-mailer": {
-        "active": true,
+        "active": true / false, //True if you want the outputfile.csv to be mailed
         "mail-to": "reciever@gmail.com",
         "mail-id": "sender@gmail.com",
         "mail-password": "sender-mail-id-pass"
