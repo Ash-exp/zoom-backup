@@ -22,15 +22,20 @@ class Transcript:
 		return records
 
 
-	def find_video_ID(self, records, meeting):
+	def find_transcript_record(self, records, meeting):
+		sub_str = "?type=cc"
+		transcript = {}
 		for record in records:
-			if record['meeting_uuid'] == meeting and record['file_extension'] == 'MP4':
-				return record['vimeo_id'], record['file_name'],record['vimeo_status']
-		return 0, 0, 0
+			if record['meeting_uuid'] == meeting and record['file_extension'] == 'VTT' and sub_str in record['download_url']:
+				return record
+			elif record['meeting_uuid'] == meeting and record['file_extension'] == 'VTT' and not sub_str in record['download_url']:
+				transcript = record
+		return transcript
 
 
 	def get_transcript(self, url, filename):
-		response = requests.request("GET", url)
+		query = {"access_token" : self.utils.zoom_token}
+		response = requests.request("GET", url, params=query)
 		if response.status_code == 200:
 			return response.content
 		else:
@@ -48,54 +53,52 @@ class Transcript:
 		}
 
 		for record in records:
-			if record['file_extension'] == 'VTT' and not "?type=cc" in record['download_url']:
-				if record['vimeo_status'] != 'active':
-					download_url = record['download_url'] + '?access_token=' + self.utils.zoom_token
-					transcript = self.get_transcript(download_url, record['file_name'])
-					if (transcript):
-						# print('\n'+' Getting the text track URI of {filename} '.format(filename=record['file_name']).center(100, ':'))
-						video_id, video_name, status = self.find_video_ID(records, record['meeting_uuid'])
-						if (video_id):
-							_url = url+"/videos/"+video_id
-							response = requests.request("GET", _url, headers=headers)
-							json_response = json.loads(response.text)
-							texttracks_uri = json_response["metadata"]["connections"]["texttracks"]["uri"]
+			if record['file_extension'] == 'MP4' and record['vimeo_status'] != 'pending' and record['vimeo_status'] != 'error':
+				transcript_record = self.find_transcript_record(records, record['meeting_uuid'])
+				if transcript_record :
+					if transcript_record['vimeo_status'] != 'active':
+						transcript = self.get_transcript(transcript_record['download_url'], transcript_record['file_name'])
+						if (transcript):
+							if (record['vimeo_id']):
+								_url = url+"/videos/"+record['vimeo_id']
+								response = requests.request("GET", _url, headers=headers)
+								json_response = json.loads(response.text)
+								texttracks_uri = json_response["metadata"]["connections"]["texttracks"]["uri"]
 
-							print('\n'+' Uploading {filename} '.format(filename=record['file_name']).center(100, ':'))
-							body = {}
+								print('\n'+' Uploading {filename} '.format(filename=transcript_record['file_name']).center(100, ':'))
+								body = {}
 
-							body['type'] = "subtitles"
-							body['language'] = "en"
-							body['name'] = record['file_name']
+								body['type'] = "subtitles"
+								body['language'] = "en"
+								body['name'] = transcript_record['file_name']
 
-							_url = url+texttracks_uri
-							response = requests.request("POST", _url, headers=headers, data=json.dumps(body))
-							json_response = json.loads(response.text)
+								_url = url+texttracks_uri
+								response = requests.request("POST", _url, headers=headers, data=json.dumps(body))
+								json_response = json.loads(response.text)
 
-							if response.status_code == 201:
+								if response.status_code == 201:
 
-								upload_link = json_response["link"]
-								patch_link = url+json_response["uri"]
-								response = requests.request(
-									"PUT", upload_link, headers=headers, data=transcript)
+									upload_link = json_response["link"]
+									patch_link = url+json_response["uri"]
+									response = requests.request("PUT", upload_link, headers=headers, data=transcript)
 
-								if response.status_code == 200:
-									response = requests.request(
-										"PATCH", patch_link, headers=headers, data=json.dumps({"active": True}))
 									if response.status_code == 200:
-										record['vimeo_status'] = "active"
-										print(' Successfully Uploaded {filename}'.format(filename=record['file_name']))
-									else:
-										record['vimeo_status'] = "not active"
-										print('\n'+' Failed to Activate {filename}. Response Status Code : {status}'.format(filename=record['file_name'], status=response.status_code).center(100, ':'))
+										response = requests.request("PATCH", patch_link, headers=headers, data=json.dumps({"active": True}))
+										if response.status_code == 200:
+											transcript_record['vimeo_status'] = "active"
+											print(' Successfully Uploaded {filename}'.format(filename=transcript_record['file_name']))
+										else:
+											transcript_record['vimeo_status'] = "not active"
+											print('\n'+' Failed to Activate {filename}. Response Status Code : {status}'.format(filename=transcript_record['file_name'], status=response.status_code).center(100, ':'))
 
-								else: print('\n'+' Failed to Upload {filename}. Response Status Code : {status}'.format(filename=record['file_name'], status=response.status_code).center(100, ':'))
+									else: print('\n'+' Failed to Upload {filename}. Response Status Code : {status}'.format(filename=transcript_record['file_name'], status=response.status_code).center(100, ':'))
 
-							else: print('\n'+' Failed Post request to texttracks_uri {filename}. Response Status Code : {status}'.format(filename=record['file_name'], status=response.status_code).center(100, ':'))
+								else: print('\n'+' Failed Post request to texttracks_uri {filename}. Response Status Code : {status}'.format(filename=transcript_record['file_name'], status=response.status_code).center(100, ':'))
 
-						else: print('\n'+'Record {filename} needs to be uploaded first! '.format(filename=video_name))
+							else: print('\n'+'Record {filename} needs to be uploaded first! '.format(filename=record['file_name']))
 
-				else: print('\n'+'Transcript {filename} is already uploaded! '.format(filename=record['file_name']))
+					else: print('\n'+'Transcript {filename} is already uploaded! '.format(filename=transcript_record['file_name']))
+				else: print('\n'+'No Transcript to upload for {filename} ! '.format(filename=record['file_name']))
 
 		return records
 

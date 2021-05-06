@@ -235,6 +235,9 @@ if __name__ == "__main__":
 	files = upload_zoom_videos(files)
 	files = check_upload_videos(files, utils.output_file)
 
+	# utils.output_file = 'outputfile.csv'
+	# files = utils.load_videos_data('outputfile.csv')
+
 	files = Transcript().upload_zoom_transcript(files)
 	files = Transcript().update_outputfile(files, utils.output_file)
 	move_videos_to_folder(files)
@@ -249,4 +252,4 @@ if __name__ == "__main__":
 		except:
 			print(' MAIL FAILED '.center(100,':'))
 
-	print('\n Script finished! '.center(100,':'))
+	print('\n'+' Script finished! '.center(100,':'))
