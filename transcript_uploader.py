@@ -51,7 +51,7 @@ class Transcript:
 			'Content-Type': 'application/json',
 			'Accept': '*/*'
 		}
-
+		failed_list = []
 		for record in records:
 			if record['file_extension'] == 'MP4' and record['vimeo_status'] != 'pending' and record['vimeo_status'] != 'error':
 				transcript_record = self.find_transcript_record(records, record['meeting_uuid'])
@@ -98,7 +98,14 @@ class Transcript:
 							else: print('\n'+'Record {filename} needs to be uploaded first! '.format(filename=record['file_name']))
 
 					else: print('\n'+'Transcript {filename} is already uploaded! '.format(filename=transcript_record['file_name']))
-				else: print('\n'+'No Transcript to upload for {filename} ! '.format(filename=record['file_name']))
+				else:
+					failed_list.append({'folder':record['vimeo_folder'], 'file': record['file_name']})
+					print('\n'+'No Transcript to upload for {filename} ! '.format(filename=record['file_name']))
+
+		if failed_list:
+			with open("No_Subtitle_Videos.txt", 'w') as f: 
+				for line in failed_list
+					f.write(line['folder']+"\t"+line['file']+"\n")
 
 		return records
 

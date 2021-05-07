@@ -109,7 +109,7 @@ class Utils:
 									item['vimeo_status']='pending'
 									item['vimeo_transcode_status']='pending'
 									item['vimeo_embedded'] = False
-									item['vimeo_folder']=item['topic'][0:31]
+									item['vimeo_folder']=item['topic']
 									filename = datetime.strptime(item['recording_start'], '%Y-%m-%dT%H:%M:%SZ').strftime("GMT%Y%m%d-%H%M%S")+str(index) +'.'+str(item['file_extension'])
 									item['file_name']=str(filename)
 									filepath = './meetings/{username}/{topic}/'.format(username=item['username'],topic=item['topic'])

@@ -131,9 +131,6 @@ def check_upload_videos(records, filename):
 	unavailablecount = 0
 	headers = headers = {'authorization': 'Bearer '+utils.vimeo_token}
 
-	if not os.path.exists('./reports'):
-		os.makedirs(str('./reports'))
-
 	with open(filename, mode='w') as f:
 		writer = csv.writer(f)
 		writer.writerow(utils.CSV_HEADER)
@@ -228,28 +225,36 @@ if __name__ == "__main__":
 	utils = Utils()
 	# files = utils.get_records(sys.argv, 'vimeo_uploader.py')
 	files = utils.get_records(arg, 'vimeo_uploader.py')
+	print("FILES :",len(files))
 
 	if utils.input_type == 1:
 		files = check_upload_videos(files, utils.input_file)
 
 	files = upload_zoom_videos(files)
+	print("FILES :",len(files))
 	files = check_upload_videos(files, utils.output_file)
+	print("FILES :",len(files))
 
 	# utils.output_file = 'outputfile.csv'
 	# files = utils.load_videos_data('outputfile.csv')
 
 	files = Transcript().upload_zoom_transcript(files)
+	print("FILES :",len(files))
 	files = Transcript().update_outputfile(files, utils.output_file)
+	print("FILES :",len(files))
 	move_videos_to_folder(files)
+	print("FILES :",len(files))
 
 	if (utils.zoom_recordings_delete):
 		files = Zoom().delete_zoom_files(files)
 		utils.save_csv(files, utils.output_file)
+	print("FILES :",len(files))
 
 	if (utils.report_mailer["active"]):
 		try:
 			Mailer().send_mail(utils.report_mailer["mail-to"])
-		except:
+		except Exception as e:
 			print(' MAIL FAILED '.center(100,':'))
+			print(e)
 
 	print('\n'+' Script finished! '.center(100,':'))
