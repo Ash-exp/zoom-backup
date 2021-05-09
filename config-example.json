@@ -13,7 +13,7 @@
     "zoom-recordings-delete": true / false, //True if you want to move succesfully uploaded files to Trash
     "report-mailer": {
         "active": true / false, //True if you want the outputfile.csv to be mailed
-        "mail-to": "reciever@gmail.com",
+        "mail-to": "reciever@gmail.com" / ["reciever1@gmail.com", "reciever2@gmail.com"], //for multiple recievers only use list []
         "mail-id": "sender@gmail.com",
         "mail-password": "sender-mail-id-pass"
     }
