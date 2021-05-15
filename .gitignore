@@ -5,5 +5,4 @@ config.json
 __pycache__/
 scripts.py
 /reports
-No_Subtitle_Videos.txt
-s3config.py
+error.txt

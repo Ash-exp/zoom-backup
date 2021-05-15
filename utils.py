@@ -23,6 +23,7 @@ class Utils:
 		self.vimeo_userid = data['vimeo-user-id']
 		self.vimeo_preset_id = data["vimeo-preset-id"]
 		self.vimeo_password = data["vimeo-password"]
+		self.s3_integrate = data["s3-integrate"]
 		self.min_duration = data["min-duration"]
 		self.zoom_recordings_delete = data["zoom-recordings-delete"]
 		self.report_mailer = data["report-mailer"]

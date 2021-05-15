@@ -9,14 +9,11 @@ from utils import Utils
 
 class Mailer:
 
-    def send_mail(self, reciever):
+    def send_mail(self, email_send):
         utils = Utils()
         email_user = utils.report_mailer["mail-id"]
         email_password = utils.report_mailer["mail-password"]
-        email_send = reciever
         subject = str(date.today())+'ZOOM RECORDINGS UPLOAD REPORT'
-        files=['outputfile.csv','No_Subtitle_Videos.txt']
-
 
         msg = MIMEMultipart()
         msg['From'] = email_user
@@ -29,7 +26,17 @@ class Mailer:
         body = 'Successfully Uploaded Zoom recordings to Vimeo.The generated reportfile is attached below.'
         msg.attach(MIMEText(body, 'plain'))
 
-        for f in files:
+        if os.path.isfile('error.txt'):
+            files=['outputfile.csv','error.txt']
+            for f in files:
+                part = MIMEBase('application', 'octet-stream')
+                part.set_payload(open(f,"rb").read())
+                encoders.encode_base64(part)
+                part.add_header('Content-Disposition',
+                            'attachment; filename="%s"' % os.path.basename(f))
+                msg.attach(part)
+        else:
+            f='outputfile.csv'
             part = MIMEBase('application', 'octet-stream')
             part.set_payload(open(f,"rb").read())
             encoders.encode_base64(part)
@@ -43,6 +50,6 @@ class Mailer:
         server.login(email_user, email_password)
 
         server.sendmail(email_user, email_send, text)
-        print('\n'+' Mail Has Been Sent To {filename} '.format(filename=reciever).center(100,':'))
+        print('\n'+' Mail Has Been Sent To {filename} '.format(filename=email_send).center(100,':'))
 
         server.quit()

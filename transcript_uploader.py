@@ -101,7 +101,11 @@ class Transcript:
 					print('\n'+'No Transcript to upload for {filename} ! '.format(filename=record['file_name']))
 
 		if failed_list:
-			with open("No_Subtitle_Videos.txt", 'w') as f: 
+			if not utils.s3_integrate["active"]:
+				f = open("error.txt", 'w')
+				f.close()
+			with open("error.txt", 'w+') as f: 
+				f.write(' Transcript upload Failed !! '.center(100, ':')+"\n")
 				for line in failed_list:
 					f.write(line['folder']+"\t"+line['file']+"\n")
 

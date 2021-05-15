@@ -1,11 +1,38 @@
 import boto3
 import urllib3
-from s3config import AccessKeyID, SecretAccessKey
+import botocore
+from utils import Utils
 
-# def lambda_handler():  # event, context
-url='https://practee.zoom.us/rec/download/7XnZ7XB7n-G18fg116G9O58LJ4BFK1GwcY4mzSF-wzhnBGnzEftWGwx6FlvdKaDYLXHSFhyFXHZOEW9M.jAzCe7jdoBxpg8SR?access_token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOm51bGwsImlzcyI6IlJIUUhDZkRpUkp1QTZhdWczT0xiVGciLCJleHAiOjI1MzQ2NTM4MDAsImlhdCI6MTYxOTQ3ODMxMn0.Lf_3TmayahoiinSwAXBj-qAKq7hu2sq-6AjTDPa-Oh4' # put your url here
-bucket = 'zoom-vimeo-back-up' #your s3 bucket
-key = 'May-15-2021/mentor-student/tisra-vedio.mp4' #your desired s3 path or filename
-s3=boto3.client('s3', aws_access_key_id = AccessKeyID, aws_secret_access_key = SecretAccessKey)
-http=urllib3.PoolManager()
-s3.upload_fileobj(http.request('GET', url,preload_content=False), bucket, key)
+class S3backup:
+
+	def __init__(self):
+		self.utils = Utils()
+	
+	def upload(self, records):
+
+		print('\n'+' Backup files from Zoom to AWS S3 '.center(100, ':'))
+		query = {"access_token" : self.utils.zoom_token}
+		failed_list = []
+
+		for record in records:
+			url = record['download_url'] # put your url here
+			key = record['recording_start'].split("T")[0]+'/'+record['topic']+'/'+record['file_name'] #your desired s3 path or filename
+			s3=boto3.client('s3', aws_access_key_id = self.utils.s3_integrate["AccessKeyID"], aws_secret_access_key = self.utils.s3_integrate["SecretAccessKey"])
+			http=urllib3.PoolManager()
+			try:
+				s3.upload_fileobj(http.request('GET', url,fields=query,preload_content=False), self.utils.s3_integrate["bucket"], key)
+				print ('Successfully uploaded %s file!' %record['file_name'])
+			except botocore.exceptions.ClientError as e:
+				if e.response['Error']['Code'] == "404":
+					print("The object does not exist.")
+				else:
+					failed_list.append({'folder':record['vimeo_folder'], 'file': record['file_name']})
+					print('\n'+'Failed to upload for {filename} ! '.format(filename=record['file_name']))
+
+		if failed_list:
+			with open("error.txt", 'w') as f: 
+				f.write(' S3 Back-up Failed !! '.center(100, ':')+"\n")
+				for line in failed_list:
+					f.write(line['folder']+"\t"+line['file']+"\n")
+
+		return records

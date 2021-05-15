@@ -14,6 +14,7 @@ from datetime import timedelta
 from time import time
 from time import sleep
 from utils import Utils
+from s3util import S3backup
 from transcript_uploader import Transcript
 from zoom_files_delete import Zoom
 from report_mailer import Mailer
@@ -182,7 +183,7 @@ def upload_zoom_videos(records):
 			if record['vimeo_status'] != 'available' and record['vimeo_status'] != 'transcoding' and record['vimeo_status'] != 'transcode_starting':
 				print('\n'+' Uploading {filename} '.format(filename=record['file_name']).center(100,':'))
 				body = {}
-				body['name']=record['file_name']
+				body['name']=record['topic']+record['recording_start'].split("T")[0]+'.'+record['file_extension']
 				body['description']=VIDEO_DESCRIPTION.format(topic=record['topic'],start_date=record['recording_start'])
 
 				privacy= {}
@@ -221,15 +222,15 @@ if __name__ == "__main__":
 	utils = Utils()
 	# files = utils.get_records(sys.argv, 'vimeo_uploader.py')
 	files = utils.get_records(arg, 'vimeo_uploader.py')
-	print("FILES :",len(files))
 
 	if utils.input_type == 1:
 		files = check_upload_videos(files, utils.input_file)
 
+	if (utils.s3_integrate["active"]):
+		files = S3backup().upload(files)
+
 	files = upload_zoom_videos(files)
-	print("FILES :",len(files))
 	files = check_upload_videos(files, utils.output_file)
-	print("FILES :",len(files))
 
 	# utils.output_file = 'outputfile.csv'
 	# files = utils.load_videos_data('outputfile.csv')

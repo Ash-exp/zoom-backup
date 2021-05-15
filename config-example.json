@@ -7,6 +7,14 @@
         "active": true / false, //True if you want to set password view in vimeo
         "password": "your_password"
     },
+    "s3-integrate": {
+        "active": true / false,
+        "AccessKeyID": "your_aws_AccessKeyID", //Generate your access key under IAM console at https://console.aws.amazon.com/iam
+        //Access key contains AccessKeyID and SecretAccessKey
+        //Make sure your access key has full access to S3
+        "SecretAccessKey": "your_aws_SecretAccessKey",
+        "bucket": "your_bucket_name"
+    },
     "min-duration": 2, //minimum duration of the zoom cloud recordings to be uploaded.
     //(set this to 0 if you want all the recordings)
 
