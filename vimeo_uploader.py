@@ -37,9 +37,6 @@ def create_vimeo_folder(foldername):
 
 	response = requests.post(url, headers=headers, json=body)
 	folder = {}
-	# json_response = {}
-	# json_response['uri']='/users/112233/projects/12345'
-	# folder[foldername] = json_response['uri'][json_response['uri'].rindex('/')+1:len(json_response['uri'])]
 
 	if response.status_code == 201:
 		json_response = json.loads(response.content)
@@ -168,7 +165,6 @@ def check_upload_videos(records, filename):
 			sleep(fibo(START_WAIT))
 			START_WAIT +=1
 			check_upload_videos(records, filename)
-			#threading.Thread(target=check_upload_videos, args=[records]).start()
 
 	return records
 
@@ -239,16 +235,12 @@ if __name__ == "__main__":
 	# files = utils.load_videos_data('outputfile.csv')
 
 	files = Transcript().upload_zoom_transcript(files)
-	print("FILES :",len(files))
 	files = Transcript().update_outputfile(files, utils.output_file)
-	print("FILES :",len(files))
 	move_videos_to_folder(files)
-	print("FILES :",len(files))
 
 	if (utils.zoom_recordings_delete):
 		files = Zoom().delete_zoom_files(files)
 		utils.save_csv(files, utils.output_file)
-	print("FILES :",len(files))
 
 	if (utils.report_mailer["active"]):
 		try:
