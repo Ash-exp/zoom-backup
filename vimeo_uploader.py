@@ -55,7 +55,7 @@ def get_vimeo_folders():
 	counter = 1
 
 	while True:
-		query = {'per_page':100, 'page':counter}
+		query = {'per_page':50, 'page':counter}
 
 		response = requests.get(url, headers=headers, params=query)
 		json_response = json.loads(response.content)
@@ -65,6 +65,7 @@ def get_vimeo_folders():
 				folders[record['name']] = record['uri'][record['uri'].rindex('/')+1:len(record['uri'])]
 
 		folders_counter += len(json_response['data'])
+		print('IN PROGRESS !! {folders} folders fetched out of {total_folders}'.format(folders=folders_counter, total_folders=json_response['total']))
 		counter += 1
 
 		if (folders_counter >=  json_response['total']):
@@ -216,12 +217,13 @@ def upload_zoom_videos(records):
 	return records
 
 if __name__ == "__main__":
-	date = date.today()-timedelta(days=1)
-	arg = ['vimeo_uploader.py', '--daterange', str(date), str(date), '--outputfile', 'outputfile.csv']
+	# date = date.today()-timedelta(days=1)
+	# arg = ['vimeo_uploader.py', '--daterange', str(date), str(date), '--outputfile', 'outputfile.csv']
+	# arg = ['vimeo_uploader.py', '--inputfile', 'inputfile.csv', '--outputfile', 'outputfile.csv']
 
 	utils = Utils()
-	# files = utils.get_records(sys.argv, 'vimeo_uploader.py')
-	files = utils.get_records(arg, 'vimeo_uploader.py')
+	files = utils.get_records(sys.argv, 'vimeo_uploader.py')
+	# files = utils.get_records(arg, 'vimeo_uploader.py')
 
 	if utils.input_type == 1:
 		files = check_upload_videos(files, utils.input_file)

@@ -73,10 +73,9 @@ class Transcript:
 
 							_url = url+texttracks_uri
 							response = requests.request("POST", _url, headers=headers, data=json.dumps(body))
-							json_response = json.loads(response.text)
 
 							if response.status_code == 201:
-
+								json_response = json.loads(response.text)
 								upload_link = json_response["link"]
 								patch_link = url+json_response["uri"]
 								response = requests.request("PUT", upload_link, headers=headers, data=transcript)
