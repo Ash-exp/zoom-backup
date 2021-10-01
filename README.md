@@ -1,11 +1,14 @@
 # Zoom, Local and Vimeo Files Backup scripts
 
-These scripts has been designed to download files from a set of Zoom accounts to your computer, upload them from Zoom to a Vimeo account and finally, remove them from Zoom. Here the files included in this repo:
+These scripts has been designed to download files from a set of Zoom accounts to your computer, upload them from Zoom to a Vimeo account, back it up to S3 and finally, remove them from Zoom and mail the report. Here the files included in this repo:
 * **config.json**: Config file
 * **utils.py**: Utils file
 * **vimeo_uploader.py**: Uploads videos from Zoom to Vimeo
+* **transcript_uploader.py**: Uploads video's transcripts from Zoom to Vimeo
 * **zoom_files_downloader.py**: Download Zoom files to your computer
+* **s3util.py**: Backup to AWS S3
 * **zoom_files_delete.py**: Delete files in Zoom account
+* **report_mailer.py**: Mail the script report
 
 All of these python scripts runs by itself, except utils.py (this is an utility script) and the syntaxis is similar for all of them.
 
@@ -14,8 +17,7 @@ All of these python scripts runs by itself, except utils.py (this is an utility 
 * wget (you can get it by: `pip wget`)
 * Zoom Pro Account
 * Vimeo Pro Account
-* Zoom Application
-* Vimeo Application
+* AWS account (required if S3 backup is enabled in config)
 
 ### config.json
 You must specify the following information in this file:
@@ -23,6 +25,11 @@ You must specify the following information in this file:
 * **Vimeo access token**
 * **Vimeo User Id**
 * **Vimeo Preset Id**
+* **Vimeo Password**
+* **S3 Integrate**
+* **Min Duration**
+* **Zoom Recordings Delete**
+* **Report Mailer**
 
 ### Getting a Zoom Token
 You can get your Zoom access token by creating a JWT Application in Zoom market place (https://marketplace.zoom.us/). You can find the steps here https://marketplace.zoom.us/docs/guides/build/jwt-app. After you create the application, you must copy the JWT Token to your config.json file.
