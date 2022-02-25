@@ -3,3 +3,4 @@ boto3 == 1.18.50
 email-to == 0.1.0
 secure-smtplib == 0.1.1
 wget == 3.2
+boto3 == 1.18.50
