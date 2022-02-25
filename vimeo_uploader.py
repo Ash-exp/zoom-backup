@@ -55,7 +55,7 @@ def get_vimeo_folders():
 	counter = 1
 
 	while True:
-		query = {'per_page':50, 'page':counter}
+		query = {'per_page':25, 'page':counter}
 
 		response = requests.get(url, headers=headers, params=query)
 		json_response = json.loads(response.content)
@@ -93,7 +93,7 @@ def move_videos_to_folder(records):
 	folders = get_vimeo_folders()
 	videos_list = {}
 	for record in records:
-		if record['file_extension'] == 'MP4':
+		if record['file_extension'] == 'MP4' and record['vimeo_uri'] != '':
 			if record['vimeo_folder'] not in videos_list:
 				videos_list[record['vimeo_folder'].rstrip()] = []
 			videos_list[record['vimeo_folder'].rstrip()].append(record['vimeo_uri'])
@@ -195,7 +195,7 @@ def upload_zoom_videos(records):
 					privacy['view']='nobody'
 				privacy['embed']='public'
 				privacy['comments']='nobody'
-				privacy['download']='false'
+				privacy['download']='true'
 
 				upload = {}
 				upload['approach']='pull'
@@ -219,11 +219,11 @@ def upload_zoom_videos(records):
 if __name__ == "__main__":
 	# date = date.today()-timedelta(days=1)
 	# arg = ['vimeo_uploader.py', '--daterange', str(date), str(date), '--outputfile', 'outputfile.csv']
-	# arg = ['vimeo_uploader.py', '--inputfile', 'inputfile.csv', '--outputfile', 'outputfile.csv']
+	arg = ['vimeo_uploader.py', '--inputfile', 'inputfile.csv', '--outputfile', 'outputfile.csv']
 
 	utils = Utils()
-	files = utils.get_records(sys.argv, 'vimeo_uploader.py')
-	# files = utils.get_records(arg, 'vimeo_uploader.py')
+	# files = utils.get_records(sys.argv, 'vimeo_uploader.py')
+	files = utils.get_records(arg, 'vimeo_uploader.py')
 
 	if utils.input_type == 1:
 		files = check_upload_videos(files, utils.input_file)
@@ -245,11 +245,11 @@ if __name__ == "__main__":
 		files = Zoom().delete_zoom_files(files)
 		utils.save_csv(files, utils.output_file)
 
-	if (utils.report_mailer["active"]):
-		try:
-			Mailer().send_mail(utils.report_mailer["mail-to"])
-		except Exception as e:
-			print(' MAIL FAILED '.center(100,':'))
-			print(e)
+	# if (utils.report_mailer["active"]):
+	# 	try:
+	# 		Mailer().send_mail(utils.report_mailer["mail-to"])
+	# 	except Exception as e:
+	# 		print(' MAIL FAILED '.center(100,':'))
+	# 		print(e)
 
 	print('\n'+' Script finished! '.center(100,':'))

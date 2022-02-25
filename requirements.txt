@@ -1,4 +1,5 @@
 requests == 2.25.1
+boto3 == 1.18.50
 email-to == 0.1.0
 secure-smtplib == 0.1.1
 wget == 3.2
